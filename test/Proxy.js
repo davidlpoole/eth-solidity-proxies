@@ -16,14 +16,34 @@ describe("Proxy", function () {
         const Logic2 = await ethers.getContractFactory("Logic2");
         const logic2 = await Logic2.deploy();
 
-        return {};
+        return {proxy, logic1, logic2};
     }
 
     it("Should work with logic1", async function () {
+        const { proxy, logic1 } = await loadFixture(deployFixture);
 
+        await proxy.changeImplementation(logic1.target);
+
+        assert.equal(await logic1.x(), 0);
+
+        await proxy.changeX(52);
+
+        assert.equal(await logic1.x(), 52);
     });
 
     it("Should work with upgrades", async function () {
+        const { proxy, logic1, logic2 } = await loadFixture(deployFixture);
 
+        await proxy.changeImplementation(logic1.target);
+        assert.equal(await logic1.x(), 0);
+
+        await proxy.changeX(52);
+        assert.equal(await logic1.x(), 52);
+
+        await proxy.changeImplementation(logic2.target);
+        assert.equal(await logic2.x(), 0);
+
+        await proxy.changeX(79);
+        assert.equal(await logic2.x(), 158);
     });
 });
