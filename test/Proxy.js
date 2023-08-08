@@ -31,29 +31,28 @@ describe("Proxy", function () {
 
         await proxy.changeImplementation(logic1.target);
 
-        assert.equal(await lookupUint(logic1.target, "0x00"), 0);
+        assert.equal(await lookupUint(proxy.target, "0x00"), 0);
 
         await proxyAsLogic1.changeX(52);
 
-        assert.equal(await lookupUint(logic1.target, "0x00"), 52);
+        assert.equal(await lookupUint(proxy.target, "0x00"), 52);
     });
 
     it("Should work with upgrades", async function () {
         const { proxy, logic1, logic2, proxyAsLogic1, proxyAsLogic2 } = await loadFixture(deployFixture);
 
+        // implement version 1 logic
         await proxy.changeImplementation(logic1.target);
-        assert.equal(await lookupUint(logic1.target, "0x00"), 0);
+        assert.equal(await lookupUint(proxy.target, "0x00"), 0);
 
-        await proxyAsLogic1.changeX(45);
-        assert.equal(await lookupUint(logic1.target, "0x00"), 45);
+        await proxyAsLogic1.changeX(10);
+        assert.equal(await lookupUint(proxy.target, "0x00"), 10);
 
+        // Upgrade to version 2 logic, existing data in storage stays the same
         await proxy.changeImplementation(logic2.target);
-        assert.equal(await lookupUint(logic2.target, "0x00"), 0);
-
-        await proxyAsLogic2.changeX(25);
-        assert.equal(await lookupUint(logic2.target, "0x00"), 25);
+        assert.equal(await lookupUint(proxy.target, "0x00"), 10);
 
         await proxyAsLogic2.tripleX();
-        assert.equal(await lookupUint(logic2.target, "0x00"), 75);
+        assert.equal(await lookupUint(proxy.target, "0x00"), 30);
     });
 });
