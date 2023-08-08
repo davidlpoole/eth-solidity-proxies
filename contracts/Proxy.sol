@@ -6,16 +6,15 @@ pragma solidity ^0.8.9;
 // EOA -> Proxy -> Logic1
 //              -> Logic2
 
-contract Proxy {
-    uint x = 0;
-    address implementation;
+import "./StorageSlot.sol";
 
+contract Proxy {
     function changeImplementation(address _implementation) external {
-        implementation = _implementation;
+        StorageSlot.getAddressSlot(bytes32(uint256(keccak256('eip1967.proxy.implementation')) - 1)).value = _implementation;
     }
 
     fallback() external {
-        (bool success, ) = implementation.delegatecall(msg.data);
+        (bool success, ) = StorageSlot.getAddressSlot(bytes32(uint256(keccak256('eip1967.proxy.implementation')) - 1)).value.delegatecall(msg.data);
         require(success);
     }
 }
