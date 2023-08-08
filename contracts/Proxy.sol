@@ -13,8 +13,9 @@ contract Proxy {
         implementation = _implementation;
     }
 
-    function changeX(uint _x) external {
-        Logic1(implementation).changeX(_x);
+    fallback() external {
+        (bool success, ) = implementation.call(msg.data);
+        require(success);
     }
 }
 
@@ -30,6 +31,11 @@ contract Logic2  {
     uint public x = 0;
 
     function changeX(uint _x) external {
-        x = _x * 2;
+        x = _x;
+    }
+
+    // new functionality in version 2
+    function tripleX() external {
+        x *= 3;
     }
 }
